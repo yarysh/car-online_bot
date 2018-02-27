@@ -9,5 +9,5 @@ type App struct {
 }
 
 func (c App) Index() revel.Result {
-	return c.RenderJSON(map[string]string{"app": "car-online_bot"})
+	return c.RenderJSON(map[string]string{"app": revel.AppName})
 }
