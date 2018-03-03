@@ -9,7 +9,7 @@ type App struct {
 	*revel.Controller
 }
 
-func (c App) Index() revel.Result {
+func (c App) Webhook() revel.Result {
 	var update map[string]interface{}
 	c.Params.BindJSON(&update)
 	bot.ProcessUpdate(update)
