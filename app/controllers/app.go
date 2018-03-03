@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/revel/revel"
-	"gopkg.in/telegram-bot-api.v4"
+	"github.com/yarysh/car-online_bot/app"
+	"github.com/yarysh/car-online_bot/app/models"
 )
 
 type App struct {
@@ -12,12 +13,15 @@ type App struct {
 }
 
 func (c App) Index() revel.Result {
-	bot, err := tgbotapi.NewBotAPI(revel.Config.StringDefault("app.bot_api_key", ""))
+
+	var users []models.User
+
+	_, err := app.DbMap.Select(&users, "select * from users")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	msg := tgbotapi.NewMessage(int64(revel.Config.IntDefault("app.bot_chat_id", 0)), revel.AppName)
-	_, sendErr := bot.Send(msg)
-	return c.RenderJSON(map[string]bool{"success": sendErr == nil})
+	fmt.Println(users)
+
+	return c.RenderJSON(map[string]bool{"success": true})
 }
