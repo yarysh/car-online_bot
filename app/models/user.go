@@ -5,6 +5,6 @@ type User struct {
 	Username  string
 	FirstName string `db:"first_name"`
 	LastName  string `db:"last_name"`
-	ChatId    int    `db:"chat_id"`
+	ChatId    int64  `db:"chat_id"`
 	ApiKey    string `db:"api_key"`
 }

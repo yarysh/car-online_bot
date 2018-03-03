@@ -41,6 +41,7 @@ func init() {
 		revel.ActionInvoker,           // Invoke the action.
 	}
 
+	// Init database
 	revel.OnAppStart(func() {
 		cred := fmt.Sprintf(
 			"user=%s password='%s' dbname=%s",
