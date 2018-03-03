@@ -4,22 +4,7 @@ import (
 	"regexp"
 )
 
-func (m message) getCommandInfo() (name string, payload string) {
-	if len(m.Entities) == 0 || m.Entities[0].Type != "bot_command" {
-		return "", ""
-	}
-	found := regexp.MustCompile(`/(?P<Command>\w+)\s(?P<Payload>\w+)`).FindStringSubmatch(m.Text)
-	if found == nil || len(found) < 2 {
-		return "", ""
-	}
-	if len(found) >= 3 {
-		return found[1], found[2]
-	} else {
-		return found[1], ""
-	}
-}
-
-func (b Bot) getMessage(update map[string]interface{}) message {
+func getMessage(update map[string]interface{}) message {
 	result := message{}
 
 	msg, ok := update["message"].(map[string]interface{})
@@ -62,6 +47,21 @@ func (b Bot) getMessage(update map[string]interface{}) message {
 		}
 	}
 	return result
+}
+
+func (m message) getCommandInfo() (name string, payload string) {
+	if len(m.Entities) == 0 || m.Entities[0].Type != "bot_command" {
+		return "", ""
+	}
+	found := regexp.MustCompile(`/(?P<Command>\w+)\s(?P<Payload>\w+)`).FindStringSubmatch(m.Text)
+	if found == nil || len(found) < 2 {
+		return "", ""
+	}
+	if len(found) >= 3 {
+		return found[1], found[2]
+	} else {
+		return found[1], ""
+	}
 }
 
 func getValue(source map[string]interface{}, key string, defaultValue interface{}) interface{} {

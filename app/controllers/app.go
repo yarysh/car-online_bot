@@ -12,7 +12,6 @@ type App struct {
 func (c App) Index() revel.Result {
 	var update map[string]interface{}
 	c.Params.BindJSON(&update)
-	tgbot := bot.Bot{}
-	tgbot.ProcessUpdate(update)
+	bot.ProcessUpdate(update)
 	return c.RenderText("")
 }
