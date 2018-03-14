@@ -2,14 +2,10 @@ package bot
 
 import (
 	"errors"
-	"net/http"
 	"net/url"
 	"strconv"
 
-	"io/ioutil"
-
-	"encoding/json"
-
+	"github.com/yarysh/car-online_bot/app/libs/helpers"
 	"github.com/yarysh/car-online_bot/app/models"
 )
 
@@ -27,24 +23,10 @@ func ProcessUpdate(update map[string]interface{}) (map[string]interface{}, error
 }
 
 func SendMessage(chatId int64, text string) (map[string]interface{}, error) {
-	var result map[string]interface{}
 	params := url.Values{}
 	params.Add("chat_id", strconv.Itoa(int(chatId)))
 	params.Add("text", text)
-	resp, err := http.Get(getApiUrl("sendMessage") + "?" + params.Encode())
-	if err != nil {
-		return result, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return result, err
-	}
-	jsonErr := json.Unmarshal(body, &result)
-	if jsonErr != nil {
-		return result, jsonErr
-	}
-	return result, err
+	return helpers.GetJsonResponse(getApiUrl("sendMessage") + "?" + params.Encode())
 }
 
 // Map of command name and func executor

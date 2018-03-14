@@ -4,6 +4,7 @@ import (
 	"regexp"
 
 	"github.com/revel/revel"
+	"github.com/yarysh/car-online_bot/app/libs/helpers"
 )
 
 func getApiUrl(methodName string) string {
@@ -18,37 +19,37 @@ func getMessage(update map[string]interface{}) message {
 		return result
 	}
 
-	result.Id = int64(getValue(msg, "message_id", 0).(float64))
+	result.Id = int64(helpers.GetValue(msg, "message_id", 0).(float64))
 	from, ok := msg["from"].(map[string]interface{})
 	if ok {
 		result.From = user{
-			Id:           int64(getValue(from, "id", 0).(float64)),
-			IsBot:        getValue(from, "is_bot", false).(bool),
-			FirstName:    getValue(from, "first_name", "").(string),
-			LastName:     getValue(from, "last_name", "").(string),
-			Username:     getValue(from, "username", "").(string),
-			LanguageCode: getValue(from, "language_code", "").(string),
+			Id:           int64(helpers.GetValue(from, "id", 0).(float64)),
+			IsBot:        helpers.GetValue(from, "is_bot", false).(bool),
+			FirstName:    helpers.GetValue(from, "first_name", "").(string),
+			LastName:     helpers.GetValue(from, "last_name", "").(string),
+			Username:     helpers.GetValue(from, "username", "").(string),
+			LanguageCode: helpers.GetValue(from, "language_code", "").(string),
 		}
 	}
 	cht, ok := msg["chat"].(map[string]interface{})
 	if ok {
 		result.Chat = chat{
-			Id:        int64(getValue(cht, "id", 0).(float64)),
-			Type:      getValue(cht, "type", "").(string),
-			FirstName: getValue(cht, "first_name", "").(string),
-			LastName:  getValue(cht, "last_name", "").(string),
-			Username:  getValue(cht, "username", "").(string),
+			Id:        int64(helpers.GetValue(cht, "id", 0).(float64)),
+			Type:      helpers.GetValue(cht, "type", "").(string),
+			FirstName: helpers.GetValue(cht, "first_name", "").(string),
+			LastName:  helpers.GetValue(cht, "last_name", "").(string),
+			Username:  helpers.GetValue(cht, "username", "").(string),
 		}
 	}
-	result.Text = getValue(msg, "text", "").(string)
+	result.Text = helpers.GetValue(msg, "text", "").(string)
 	entities, ok := msg["entities"].([]interface{})
 	if ok {
 		for _, entity := range entities {
 			result.Entities = append(result.Entities, messageEntity{
-				Type:   getValue(entity.(map[string]interface{}), "type", "").(string),
-				Offset: int(getValue(entity.(map[string]interface{}), "offset", "").(float64)),
-				Length: int(getValue(entity.(map[string]interface{}), "length", "").(float64)),
-				Url:    getValue(entity.(map[string]interface{}), "url", "").(string),
+				Type:   helpers.GetValue(entity.(map[string]interface{}), "type", "").(string),
+				Offset: int(helpers.GetValue(entity.(map[string]interface{}), "offset", "").(float64)),
+				Length: int(helpers.GetValue(entity.(map[string]interface{}), "length", "").(float64)),
+				Url:    helpers.GetValue(entity.(map[string]interface{}), "url", "").(string),
 			})
 		}
 	}
@@ -68,12 +69,4 @@ func (m message) getCommandInfo() (name string, payload string) {
 	} else {
 		return found[1], ""
 	}
-}
-
-func getValue(source map[string]interface{}, key string, defaultValue interface{}) interface{} {
-	value, ok := source[key]
-	if !ok {
-		return defaultValue
-	}
-	return value
 }
