@@ -2,7 +2,13 @@ package bot
 
 import (
 	"regexp"
+
+	"github.com/revel/revel"
 )
+
+func getApiUrl(methodName string) string {
+	return "https://api.telegram.org/bot" + revel.Config.StringDefault("bot.api_key", "") + "/" + methodName
+}
 
 func getMessage(update map[string]interface{}) message {
 	result := message{}
