@@ -2,7 +2,6 @@ package bot
 
 import (
 	"errors"
-	"net/url"
 	"strconv"
 
 	"github.com/yarysh/car-online_bot/app/libs/helpers"
@@ -23,10 +22,9 @@ func ProcessUpdate(update map[string]interface{}) (map[string]interface{}, error
 }
 
 func SendMessage(chatId int64, text string) (map[string]interface{}, error) {
-	params := url.Values{}
-	params.Add("chat_id", strconv.Itoa(int(chatId)))
-	params.Add("text", text)
-	return helpers.GetJsonResponse(getApiUrl("sendMessage") + "?" + params.Encode())
+	return helpers.GetJsonResponse(getApiUrl("sendMessage", map[string]string{
+		"chat_id": strconv.Itoa(int(chatId)), "text": text,
+	}))
 }
 
 // Map of command name and func executor
