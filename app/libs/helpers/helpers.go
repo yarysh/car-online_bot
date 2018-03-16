@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/yarysh/car-online_bot/app/models"
 )
 
 func BoolDefault(source map[string]interface{}, key string, defaultValue bool) bool {
@@ -33,20 +35,38 @@ func StringDefault(source map[string]interface{}, key string, defaultValue strin
 	}
 }
 
-func GetJsonResponse(url string) (map[string]interface{}, error) {
+func GetJsonResponse(url string, logging bool) (map[string]interface{}, error) {
 	var result map[string]interface{}
+
+	rl := models.RequestLog{Url: url}
 	resp, err := http.Get(url)
 	if err != nil {
+		if logging {
+			rl.Error = err.Error()
+			rl.Save()
+		}
 		return result, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
+	rl.Response = string(body)
 	if err != nil {
+		if logging {
+			rl.Error = err.Error()
+			rl.Save()
+		}
 		return result, err
 	}
 	jsonErr := json.Unmarshal(body, &result)
 	if jsonErr != nil {
+		if logging {
+			rl.Error = jsonErr.Error()
+			rl.Save()
+		}
 		return result, jsonErr
+	}
+	if logging {
+		rl.Save()
 	}
 	return result, nil
 }

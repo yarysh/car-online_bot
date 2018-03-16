@@ -22,9 +22,8 @@ func ProcessUpdate(update map[string]interface{}) (map[string]interface{}, error
 }
 
 func SendMessage(chatId int64, text string) (map[string]interface{}, error) {
-	return helpers.GetJsonResponse(getApiUrl("sendMessage", map[string]string{
-		"chat_id": strconv.Itoa(int(chatId)), "text": text,
-	}))
+	url := getApiUrl("sendMessage", map[string]string{"chat_id": strconv.Itoa(int(chatId)), "text": text})
+	return helpers.GetJsonResponse(url, false)
 }
 
 // Map of command name and func executor

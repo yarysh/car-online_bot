@@ -12,7 +12,7 @@ type Car struct {
 
 func (c Car) GetStatus() (Status, error) {
 	status := Status{}
-	resp, err := helpers.GetJsonResponse(c.getApiUrl("status", nil))
+	resp, err := helpers.GetJsonResponse(c.getApiUrl("status", nil), true)
 	if err != nil {
 		return status, err
 	}
@@ -38,6 +38,7 @@ func (c Car) GetTemperature(begin int, end int) ([]Temperature, error) {
 	var temps []Temperature
 	resp, err := helpers.GetJsonResponse(
 		c.getApiUrl("temperaturelist", map[string]string{"begin": strconv.Itoa(begin), "end": strconv.Itoa(end)}),
+		true,
 	)
 	if err != nil {
 		return temps, err
@@ -58,6 +59,7 @@ func (c Car) GetTelemetry(begin int, end int) (Telemetry, error) {
 	telemetry := Telemetry{}
 	resp, err := helpers.GetJsonResponse(
 		c.getApiUrl("telemetry", map[string]string{"begin": strconv.Itoa(begin), "end": strconv.Itoa(end)}),
+		true,
 	)
 	if err != nil {
 		return telemetry, err
