@@ -19,16 +19,16 @@ func (c Car) GetStatus() (Status, error) {
 	gpsData, ok := resp["gps"].(map[string]interface{})
 	if ok {
 		status.Gps = gps{
-			Lat:   float32(helpers.GetValue(gpsData, "latitude", 0).(float64)),
-			Long:  float32(helpers.GetValue(gpsData, "longitude", 0).(float64)),
-			Speed: int(helpers.GetValue(gpsData, "speed", 0).(float64)),
+			Lat:   float32(helpers.FloatDefault(gpsData, "latitude", 0)),
+			Long:  float32(helpers.FloatDefault(gpsData, "longitude", 0)),
+			Speed: int(helpers.FloatDefault(gpsData, "speed", 0)),
 		}
 	}
 	voltageData, ok := resp["voltage"].(map[string]interface{})
 	if ok {
 		status.Voltage = voltage{
-			Main:     float32(helpers.GetValue(voltageData, "main", 0).(float64)),
-			Reserved: float32(helpers.GetValue(voltageData, "reserved", 0).(float64)),
+			Main:     float32(helpers.FloatDefault(voltageData, "main", 0)),
+			Reserved: float32(helpers.FloatDefault(voltageData, "reserved", 0)),
 		}
 	}
 	return status, nil
@@ -46,8 +46,8 @@ func (c Car) GetTemperature(begin int, end int) ([]Temperature, error) {
 	if ok {
 		for _, temp := range tempList {
 			temps = append(temps, Temperature{
-				Time:  int(helpers.GetValue(temp.(map[string]interface{}), "eventTime", 0).(float64)),
-				Value: int8(helpers.GetValue(temp.(map[string]interface{}), "value", 0).(float64)),
+				Time:  int(helpers.FloatDefault(temp.(map[string]interface{}), "eventTime", 0)),
+				Value: int8(helpers.FloatDefault(temp.(map[string]interface{}), "value", 0)),
 			})
 		}
 	}
@@ -62,11 +62,11 @@ func (c Car) GetTelemetry(begin int, end int) (Telemetry, error) {
 	if err != nil {
 		return telemetry, err
 	}
-	telemetry.AvgSpeed = float32(helpers.GetValue(resp, "averageSpeed", 0).(float64))
-	telemetry.EngineTime = int64(helpers.GetValue(resp, "engineTime", 0).(float64))
-	telemetry.MaxSpeed = float32(helpers.GetValue(resp, "maxSpeed", 0).(float64))
-	telemetry.Mileage = helpers.GetValue(resp, "mileage", 0).(float64)
-	telemetry.Stands = int64(helpers.GetValue(resp, "standsCount", 0).(float64))
-	telemetry.Ways = int64(helpers.GetValue(resp, "waysCount", 0).(float64))
+	telemetry.AvgSpeed = float32(helpers.FloatDefault(resp, "averageSpeed", 0))
+	telemetry.EngineTime = int64(helpers.FloatDefault(resp, "engineTime", 0))
+	telemetry.MaxSpeed = float32(helpers.FloatDefault(resp, "maxSpeed", 0))
+	telemetry.Mileage = helpers.FloatDefault(resp, "mileage", 0)
+	telemetry.Stands = int64(helpers.FloatDefault(resp, "standsCount", 0))
+	telemetry.Ways = int64(helpers.FloatDefault(resp, "waysCount", 0))
 	return telemetry, nil
 }
