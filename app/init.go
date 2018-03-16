@@ -3,7 +3,12 @@ package app
 import (
 	"path"
 
+	_ "github.com/lib/pq"
 	"github.com/revel/revel"
+	"gopkg.in/gorp.v2"
+
+	"database/sql"
+	"fmt"
 )
 
 var (
@@ -12,6 +17,9 @@ var (
 
 	// BuildTime revel app build-time (ldflags)
 	BuildTime string
+
+	// Database map
+	DbMap *gorp.DbMap
 )
 
 func init() {
@@ -32,6 +40,21 @@ func init() {
 		revel.CompressFilter,          // Compress the result.
 		revel.ActionInvoker,           // Invoke the action.
 	}
+
+	// Init database
+	revel.OnAppStart(func() {
+		cred := fmt.Sprintf(
+			"user=%s password='%s' dbname=%s",
+			revel.Config.StringDefault("db.user", ""),
+			revel.Config.StringDefault("db.password", ""),
+			revel.Config.StringDefault("db.name", ""),
+		)
+		db, err := sql.Open("postgres", cred)
+		if err != nil {
+			revel.INFO.Println("Database connection error:", err)
+		}
+		DbMap = &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
+	})
 }
 
 // HeaderFilter adds common security headers
