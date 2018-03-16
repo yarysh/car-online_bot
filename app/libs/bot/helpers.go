@@ -24,37 +24,37 @@ func getMessage(update map[string]interface{}) message {
 		return result
 	}
 
-	result.Id = int64(helpers.GetValue(msg, "message_id", 0).(float64))
+	result.Id = int64(helpers.FloatDefault(msg, "message_id", 0))
 	from, ok := msg["from"].(map[string]interface{})
 	if ok {
 		result.From = user{
-			Id:           int64(helpers.GetValue(from, "id", 0).(float64)),
-			IsBot:        helpers.GetValue(from, "is_bot", false).(bool),
-			FirstName:    helpers.GetValue(from, "first_name", "").(string),
-			LastName:     helpers.GetValue(from, "last_name", "").(string),
-			Username:     helpers.GetValue(from, "username", "").(string),
-			LanguageCode: helpers.GetValue(from, "language_code", "").(string),
+			Id:           int64(helpers.FloatDefault(from, "id", 0)),
+			IsBot:        helpers.BoolDefault(from, "is_bot", false),
+			FirstName:    helpers.StringDefault(from, "first_name", ""),
+			LastName:     helpers.StringDefault(from, "last_name", ""),
+			Username:     helpers.StringDefault(from, "username", ""),
+			LanguageCode: helpers.StringDefault(from, "language_code", ""),
 		}
 	}
 	cht, ok := msg["chat"].(map[string]interface{})
 	if ok {
 		result.Chat = chat{
-			Id:        int64(helpers.GetValue(cht, "id", 0).(float64)),
-			Type:      helpers.GetValue(cht, "type", "").(string),
-			FirstName: helpers.GetValue(cht, "first_name", "").(string),
-			LastName:  helpers.GetValue(cht, "last_name", "").(string),
-			Username:  helpers.GetValue(cht, "username", "").(string),
+			Id:        int64(helpers.FloatDefault(cht, "id", 0)),
+			Type:      helpers.StringDefault(cht, "type", ""),
+			FirstName: helpers.StringDefault(cht, "first_name", ""),
+			LastName:  helpers.StringDefault(cht, "last_name", ""),
+			Username:  helpers.StringDefault(cht, "username", ""),
 		}
 	}
-	result.Text = helpers.GetValue(msg, "text", "").(string)
+	result.Text = helpers.StringDefault(msg, "text", "")
 	entities, ok := msg["entities"].([]interface{})
 	if ok {
 		for _, entity := range entities {
 			result.Entities = append(result.Entities, messageEntity{
-				Type:   helpers.GetValue(entity.(map[string]interface{}), "type", "").(string),
-				Offset: int(helpers.GetValue(entity.(map[string]interface{}), "offset", "").(float64)),
-				Length: int(helpers.GetValue(entity.(map[string]interface{}), "length", "").(float64)),
-				Url:    helpers.GetValue(entity.(map[string]interface{}), "url", "").(string),
+				Type:   helpers.StringDefault(entity.(map[string]interface{}), "type", ""),
+				Offset: int(helpers.FloatDefault(entity.(map[string]interface{}), "offset", 0)),
+				Length: int(helpers.FloatDefault(entity.(map[string]interface{}), "length", 0)),
+				Url:    helpers.StringDefault(entity.(map[string]interface{}), "url", ""),
 			})
 		}
 	}

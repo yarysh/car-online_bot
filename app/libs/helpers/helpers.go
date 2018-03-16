@@ -6,12 +6,31 @@ import (
 	"net/http"
 )
 
-func GetValue(source map[string]interface{}, key string, defaultValue interface{}) interface{} {
-	value, ok := source[key]
-	if !ok {
+func BoolDefault(source map[string]interface{}, key string, defaultValue bool) bool {
+	value, ok := getValue(source, key, defaultValue).(bool)
+	if ok {
+		return value
+	} else {
 		return defaultValue
 	}
-	return value
+}
+
+func FloatDefault(source map[string]interface{}, key string, defaultValue float64) float64 {
+	value, ok := getValue(source, key, defaultValue).(float64)
+	if ok {
+		return value
+	} else {
+		return defaultValue
+	}
+}
+
+func StringDefault(source map[string]interface{}, key string, defaultValue string) string {
+	value, ok := getValue(source, key, defaultValue).(string)
+	if ok {
+		return value
+	} else {
+		return defaultValue
+	}
 }
 
 func GetJsonResponse(url string) (map[string]interface{}, error) {
@@ -30,4 +49,12 @@ func GetJsonResponse(url string) (map[string]interface{}, error) {
 		return result, jsonErr
 	}
 	return result, nil
+}
+
+func getValue(source map[string]interface{}, key string, defaultValue interface{}) interface{} {
+	value, ok := source[key]
+	if !ok {
+		return defaultValue
+	}
+	return value
 }
