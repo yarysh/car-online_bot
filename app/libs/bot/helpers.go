@@ -4,9 +4,39 @@ import (
 	"net/url"
 	"regexp"
 
+	"encoding/json"
+
+	"net/http"
+
+	"bytes"
+
+	"io/ioutil"
+
+	"fmt"
+
 	"github.com/revel/revel"
 	"github.com/yarysh/car-online_bot/app/libs/helpers"
 )
+
+func (m *Message) Send() (map[string]interface{}, error) {
+	var result map[string]interface{}
+	jsonM, err := json.Marshal(m)
+	fmt.Println(fmt.Sprintf("%s", jsonM))
+	if err != nil {
+		return result, err
+	}
+	resp, err := http.Post(getApiUrl("sendMessage", nil), "application/json", bytes.NewBuffer(jsonM))
+	if err != nil {
+		return result, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	jsonErr := json.Unmarshal(body, &result)
+	if jsonErr != nil {
+		return result, jsonErr
+	}
+	return result, nil
+}
 
 func getApiUrl(methodName string, params map[string]string) string {
 	p := url.Values{}
@@ -16,8 +46,8 @@ func getApiUrl(methodName string, params map[string]string) string {
 	return "https://api.telegram.org/bot" + revel.Config.StringDefault("bot.api_key", "") + "/" + methodName + "?" + p.Encode()
 }
 
-func getMessage(update map[string]interface{}) message {
-	result := message{}
+func getUpdateMessage(update map[string]interface{}) updateMessage {
+	result := updateMessage{}
 
 	msg, ok := update["message"].(map[string]interface{})
 	if !ok {
@@ -25,15 +55,15 @@ func getMessage(update map[string]interface{}) message {
 	}
 
 	result.Id = int64(helpers.FloatDefault(msg, "message_id", 0))
-	from, ok := msg["from"].(map[string]interface{})
+	frm, ok := msg["from"].(map[string]interface{})
 	if ok {
-		result.From = user{
-			Id:           int64(helpers.FloatDefault(from, "id", 0)),
-			IsBot:        helpers.BoolDefault(from, "is_bot", false),
-			FirstName:    helpers.StringDefault(from, "first_name", ""),
-			LastName:     helpers.StringDefault(from, "last_name", ""),
-			Username:     helpers.StringDefault(from, "username", ""),
-			LanguageCode: helpers.StringDefault(from, "language_code", ""),
+		result.From = from{
+			Id:           int64(helpers.FloatDefault(frm, "id", 0)),
+			IsBot:        helpers.BoolDefault(frm, "is_bot", false),
+			FirstName:    helpers.StringDefault(frm, "first_name", ""),
+			LastName:     helpers.StringDefault(frm, "last_name", ""),
+			Username:     helpers.StringDefault(frm, "username", ""),
+			LanguageCode: helpers.StringDefault(frm, "language_code", ""),
 		}
 	}
 	cht, ok := msg["chat"].(map[string]interface{})
@@ -61,11 +91,11 @@ func getMessage(update map[string]interface{}) message {
 	return result
 }
 
-func (m message) getCommandInfo() (name string, payload string) {
-	if len(m.Entities) == 0 || m.Entities[0].Type != "bot_command" {
+func (u updateMessage) getCommandInfo() (name string, payload string) {
+	if len(u.Entities) == 0 || u.Entities[0].Type != "bot_command" {
 		return "", ""
 	}
-	found := regexp.MustCompile(`/(?P<Command>\w+)\s(?P<Payload>\w+)`).FindStringSubmatch(m.Text)
+	found := regexp.MustCompile(`/(?P<Command>\w+)\s(?P<Payload>\w+)`).FindStringSubmatch(u.Text)
 	if found == nil || len(found) < 2 {
 		return "", ""
 	}

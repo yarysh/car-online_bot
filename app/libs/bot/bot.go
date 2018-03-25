@@ -2,15 +2,13 @@ package bot
 
 import (
 	"errors"
-	"strconv"
 
-	"github.com/yarysh/car-online_bot/app/libs/helpers"
 	"github.com/yarysh/car-online_bot/app/models"
 )
 
 func ProcessUpdate(update map[string]interface{}) (map[string]interface{}, error) {
-	message := getMessage(update)
-	name, payload := message.getCommandInfo()
+	updateMessage := getUpdateMessage(update)
+	name, payload := updateMessage.getCommandInfo()
 	if name == "" {
 		return nil, nil
 	}
@@ -18,33 +16,28 @@ func ProcessUpdate(update map[string]interface{}) (map[string]interface{}, error
 	if !ok {
 		return nil, errors.New("no such commands")
 	}
-	return command(payload, message)
-}
-
-func SendMessage(chatId int64, text string) (map[string]interface{}, error) {
-	url := getApiUrl("sendMessage", map[string]string{"chat_id": strconv.Itoa(int(chatId)), "text": text})
-	return helpers.GetJsonResponse(url, false)
+	return command(payload, updateMessage)
 }
 
 // Map of command name and func executor
-var commands = map[string]func(payload string, message message) (map[string]interface{}, error){
+var commands = map[string]func(payload string, update updateMessage) (map[string]interface{}, error){
 	"set_key": setApiKey,
 }
 
 // Set car-online api key for user
-func setApiKey(payload string, msg message) (map[string]interface{}, error) {
+func setApiKey(payload string, update updateMessage) (map[string]interface{}, error) {
 	if payload == "" {
 		return nil, errors.New("api key is empty")
 	}
 	_, err := models.User{
-		Username:  msg.From.Username,
-		FirstName: msg.From.FirstName,
-		LastName:  msg.From.LastName,
-		ChatId:    msg.From.Id,
+		Username:  update.From.Username,
+		FirstName: update.From.FirstName,
+		LastName:  update.From.LastName,
+		ChatId:    update.From.Id,
 		ApiKey:    payload,
 	}.UpdateApiKey()
 	if err != nil {
 		return nil, errors.New("sql error")
 	}
-	return SendMessage(msg.From.Id, "API ключ успешно обновлен")
+	return Message{ChatId: update.From.Id, Text: "API ключ успешно обновлен"}.Send()
 }
